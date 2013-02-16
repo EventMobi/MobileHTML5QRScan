@@ -5,7 +5,6 @@
     <title></title>
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
     <script type="text/javascript" src="js/grid.js"></script>
     <script type="text/javascript" src="js/version.js"></script>
@@ -24,6 +23,7 @@
     <script type="text/javascript" src="js/findpat.js"></script>
     <script type="text/javascript" src="js/alignpat.js"></script>
     <script type="text/javascript" src="js/databr.js"></script>
+    <script type="text/javascript" src="js/mobihtml5qr.js"></script>
 
     <!--[if IE]>
         <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -31,134 +31,14 @@
 </head>
 <body>
     <h3>Take a photo of the QR code</h3>
-    <input type="file" name="image" accept="image/*">
+    <input type="file" name="image" id="qrImage" accept="image/*">
     <canvas id="qr-canvas"></canvas>
 
     <script>
 
-        function detectSubsampling(img) {
-            var iw = img.naturalWidth, ih = img.naturalHeight;
-            if (iw * ih > 1024 * 1024) { // subsampling may happen over megapixel image
-              var canvas = document.createElement('canvas');
-              canvas.width = canvas.height = 1;
-              var ctx = canvas.getContext('2d');
-              ctx.drawImage(img, -iw + 1, 0);
-              // subsampled image becomes half smaller in rendering size.
-              // check alpha channel value to confirm image is covering edge pixel or not.
-              // if alpha value is 0 image is not covering, hence subsampled.
-              var res = ctx.getImageData(0, 0, 1, 1).data[3] === 0;
-              canvas = null;
-              return res;
-            } else {
-              return false;
-            }
-        }
-
-        function detectVerticalSquash(img, iw, ih) {
-            var canvas = document.createElement('canvas');
-            canvas.width = 1;
-            canvas.height = ih;
-            var ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            var data = ctx.getImageData(0, 0, 1, ih).data;
-            // search image edge pixel position in case it is squashed vertically.
-            var sy = 0;
-            var ey = ih;
-            var py = ih;
-            while (py > sy) {
-              var alpha = data[(py - 1) * 4 + 3];
-              if (alpha === 0) {
-                ey = py;
-              } else {
-                sy = py;
-              }
-              py = (ey + sy) >> 1;
-            }
-            canvas = null;
-            return py / ih;
-        }
-
-        $('input[name=image]').change(function(e) {
-            var file = e.target.files[0];
-
-            // Only process image files
-            if (!file.type.match('image.*')) {
-                return;
-            }
-
-            var reader = new FileReader();
-
-            reader.onloadend = function(e){
-
-                var image = new Image();
-                image.onload = function(e){
-                    var canvas = document.getElementById("qr-canvas");
-
-
-
-                    var iw = image.naturalWidth, ih = image.naturalHeight;
-                    var ctx = canvas.getContext('2d');
-                    ctx.save();
-
-
-                    var MAX_WIDTH = 800;
-                    var MAX_HEIGHT = 800;
-                    var width = image.width;
-                    var height = image.height;
-
-                    if (width > height) {
-                      if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                      }
-                    } else {
-                      if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                      }
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.drawImage(image, 0, 0, width, height);
-
-                    var subsampled = detectSubsampling(image);
-                    if (subsampled) {
-                      iw /= 2;
-                      ih /= 2;
-                    }
-                    var d = 800; // size of tiling canvas
-                    var tmpCanvas = document.createElement('canvas');
-                    tmpCanvas.width = tmpCanvas.height = d;
-                    var tmpCtx = tmpCanvas.getContext('2d');
-                    var vertSquashRatio = detectVerticalSquash(image, iw, ih);
-                    var sy = 0;
-                    while (sy < ih) {
-                      var sh = sy + d > ih ? ih - sy : d;
-                      var sx = 0;
-                      while (sx < iw) {
-                        var sw = sx + d > iw ? iw - sx : d;
-                        tmpCtx.clearRect(0, 0, d, d);
-                        tmpCtx.drawImage(image, -sx, -sy);
-                        var dx = Math.floor(sx * width / iw);
-                        var dw = Math.ceil(sw * width / iw);
-                        var dy = Math.floor(sy * height / ih / vertSquashRatio);
-                        var dh = Math.ceil(sh * height / ih / vertSquashRatio);
-                        ctx.drawImage(tmpCanvas, 0, 0, sw, sh, dx, dy, dw, dh);
-                        sx += d;
-                      }
-                      sy += d;
-                    }
-                    ctx.restore();
-                    tmpCanvas = tmpCtx = null;
-
-                    qrcode.decode();
-                }
-
-                image.src = e.target.result;
-            }
-
-            reader.readAsDataURL(file);
-        });
+        window.onload = function() {
+            html5QRScan('qrImage');
+        };
 
     </script>
 </body>
