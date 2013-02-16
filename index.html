@@ -83,6 +83,7 @@
         }
 
         $('input[name=image]').change(function(e) {
+            // Get the single file from the File upload
             var file = e.target.files[0];
 
             // Only process image files
@@ -92,18 +93,17 @@
 
             var reader = new FileReader();
 
+            // Event handler managing once the FileReader object has been fully assigned the base64 image
             reader.onloadend = function(e){
 
                 var image = new Image();
                 image.onload = function(e){
+
                     var canvas = document.getElementById("qr-canvas");
-
-
 
                     var iw = image.naturalWidth, ih = image.naturalHeight;
                     var ctx = canvas.getContext('2d');
                     ctx.save();
-                    
 
                     var MAX_WIDTH = 800;
                     var MAX_HEIGHT = 800;
@@ -124,7 +124,7 @@
                     canvas.width = width;
                     canvas.height = height;
                     ctx.drawImage(image, 0, 0, width, height);
-                    
+
                     var subsampled = detectSubsampling(image);
                     if (subsampled) {
                       iw /= 2;
@@ -163,9 +163,11 @@
                     }
                 }
 
+                // Create an image object and assign the source of the object to the base64 rep of the photo
                 image.src = e.target.result;
             }
 
+            // Assign the base64 representation of the image
             reader.readAsDataURL(file);
         });
 
