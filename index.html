@@ -77,8 +77,12 @@
                     canvas.height = height;
                     context.drawImage(image, 0, 0, width, height);
 
-                    qrcode.callback = read;
-                    qrcode.decode();
+                    try{
+                        qrcode.callback = read;
+                        qrcode.decode();
+                    } catch(err) {
+                        alert(err);
+                    }
                 }
 
                 image.src = e.target.result;
