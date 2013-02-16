@@ -103,7 +103,7 @@
                     var iw = image.naturalWidth, ih = image.naturalHeight;
                     var ctx = canvas.getContext('2d');
                     ctx.save();
-                    
+
 
                     var MAX_WIDTH = 800;
                     var MAX_HEIGHT = 800;
@@ -124,7 +124,7 @@
                     canvas.width = width;
                     canvas.height = height;
                     ctx.drawImage(image, 0, 0, width, height);
-                    
+
                     var subsampled = detectSubsampling(image);
                     if (subsampled) {
                       iw /= 2;
@@ -160,7 +160,7 @@
                         qrcode.decode();
                     } catch(err) {
                         //log detailed error here
-                        alert("QR code not recognized, please try again. Details: " + err);
+                        alert("QR code not recognized, please make sure QR code is clear and aligned then try again. Details: " + err);
                     }
                 }
 
