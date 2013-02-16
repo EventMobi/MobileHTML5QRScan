@@ -1,6 +1,6 @@
 /*
    Copyright 2011 Lazar Laszlo (lazarsoft@gmail.com, www.lazarsoft.info)
-   
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -24,10 +24,35 @@ qrcode.debug = false;
 
 qrcode.sizeOfDataLengthInfo =  [  [ 10, 9, 8, 8 ],  [ 12, 11, 16, 10 ],  [ 14, 13, 16, 12 ] ];
 
-qrcode.callback = null;
+//default callback on success
+qrcode.successCallback = function(msg){
+	var urlPattern = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/
+	var emailPattern = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  	var mailtoPattern = /^mailto:/;
+  	var matmsgPattern = /^MATMSG:/;
+  	var telPattern = /^tel:/;
+
+	if(urlPattern.test(msg) || mailtoPattern.test(msg) || telPattern.test(telPattern)) {
+		window.location.replace(msg);
+	} else if (emailPattern.test(msg)) {
+		window.location.replace('<a href="mailto:' + msg + '" />');
+	} else if (matmsgPattern.test(msg)) {
+		var to_recipient = msg.match(/TO:([^;]*);/i)[1];
+		var subject = msg.match(/SUB:([^;]*);/i)[1];
+		var mail_body = msg.match(/BODY:([^;]*);;$/i)[1];
+		window.location.replace("mailto:" + to_recipient + "?subject=" + subject + "&body=" + mail_body);
+	} else {
+		alert(msg);
+	}
+};
+
+//default callback on error
+qrcode.errorCallback = function(err){
+	alert("QR code not recognized, please make sure QR code is clear and aligned then try again. Details: " + err);
+};
 
 qrcode.decode = function(src){
-	
+
 	if(arguments.length==0)
 	{
 		var canvas_qr = document.getElementById("qr-canvas");
@@ -36,8 +61,7 @@ qrcode.decode = function(src){
 		qrcode.height = canvas_qr.height;
 		qrcode.imagedata = context.getImageData(0, 0, qrcode.width, qrcode.height);
         qrcode.result = qrcode.process(context);
-        if(qrcode.callback!=null)
-            qrcode.callback(qrcode.result);
+        qrcode.successCallback(qrcode.result);
 		return qrcode.result;
 	}
 	else
@@ -63,11 +87,10 @@ qrcode.decode = function(src){
 				qrcode.imagedata = context.getImageData(0, 0, image.width, image.height);
 			}catch(e){
 				qrcode.result = "Cross domain image reading not supported in your browser! Save it to your computer then drag and drop the file!";
-				if(qrcode.callback!=null)
-					qrcode.callback(qrcode.result);
+				qrcode.errorCallback(qrcode.result);
 				return;
 			}
-			
+
             try
             {
                 qrcode.result = qrcode.process(context);
@@ -77,8 +100,7 @@ qrcode.decode = function(src){
 				console.log(e);
                 qrcode.result = "error decoding QR Code";
             }
-			if(qrcode.callback!=null)
-				qrcode.callback(qrcode.result);
+			qrcode.successCallback(qrcode.result);
 		}
 		image.src = src;
 	}
@@ -90,12 +112,12 @@ qrcode.decode_utf8 = function ( s )
 }
 
 qrcode.process = function(ctx){
-	
+
 	var start = new Date().getTime();
 
 	var image = qrcode.grayScaleToBitmap(qrcode.grayscale());
     //var image = qrcode.binarize(128);
-	
+
     if(qrcode.debug)
     {
         for (var y = 0; y < qrcode.height; y++)
@@ -110,13 +132,13 @@ qrcode.process = function(ctx){
         }
         ctx.putImageData(qrcode.imagedata, 0, 0);
     }
-	
+
 	//var finderPatternInfo = new FinderPatternFinder().findFinderPattern(image);
-	
+
 	var detector = new Detector(image);
 
 	var qRCodeMatrix = detector.detect();
-	
+
 	/*for (var y = 0; y < qRCodeMatrix.bits.Height; y++)
 	{
 		for (var x = 0; x < qRCodeMatrix.bits.Width; x++)
@@ -129,7 +151,7 @@ qrcode.process = function(ctx){
 	}*/
     if(qrcode.debug)
         ctx.putImageData(qrcode.imagedata, 0, 0);
-	
+
 	var reader = Decoder.decode(qRCodeMatrix.bits);
 	var data = reader.DataByte;
 	var str="";
@@ -138,11 +160,11 @@ qrcode.process = function(ctx){
 		for(var j=0;j<data[i].length;j++)
 			str+=String.fromCharCode(data[i][j]);
 	}
-	
+
 	var end = new Date().getTime();
 	var time = end - start;
 	console.log(time);
-    
+
 	return qrcode.decode_utf8(str);
 	//alert("Time:" + time + " Code: "+str);
 }
@@ -166,7 +188,7 @@ qrcode.binarize = function(th){
 		for (var x = 0; x < qrcode.width; x++)
 		{
 			var gray = qrcode.getPixel(x, y);
-			
+
 			ret[x+y*qrcode.width] = gray<=th?true:false;
 		}
 	}
@@ -222,7 +244,7 @@ qrcode.getMiddleBrightnessPerArea=function(image)
 		//Console.out.println("");
 	}
 	//Console.out.println("");
-	
+
 	return middle;
 }
 
@@ -233,7 +255,7 @@ qrcode.grayScaleToBitmap=function(grayScale)
 	var areaWidth = Math.floor(qrcode.width / sqrtNumArea);
 	var areaHeight = Math.floor(qrcode.height / sqrtNumArea);
 	var bitmap = new Array(qrcode.height*qrcode.width);
-	
+
 	for (var ay = 0; ay < sqrtNumArea; ay++)
 	{
 		for (var ax = 0; ax < sqrtNumArea; ax++)
@@ -257,7 +279,7 @@ qrcode.grayscale = function(){
 		for (var x = 0; x < qrcode.width; x++)
 		{
 			var gray = qrcode.getPixel(x, y);
-			
+
 			ret[x+y*qrcode.width] = gray;
 		}
 	}

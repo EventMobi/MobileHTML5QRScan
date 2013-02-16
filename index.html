@@ -24,6 +24,7 @@
     <script type="text/javascript" src="js/findpat.js"></script>
     <script type="text/javascript" src="js/alignpat.js"></script>
     <script type="text/javascript" src="js/databr.js"></script>
+
     <!--[if IE]>
         <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -75,11 +76,6 @@
             }
             canvas = null;
             return py / ih;
-        }
-
-        function read(a)
-        {
-            alert(a);
         }
 
         $('input[name=image]').change(function(e) {
@@ -155,13 +151,7 @@
                     ctx.restore();
                     tmpCanvas = tmpCtx = null;
 
-                    try{
-                        qrcode.callback = read;
-                        qrcode.decode();
-                    } catch(err) {
-                        //log detailed error here
-                        alert("QR code not recognized, please make sure QR code is clear and aligned then try again. Details: " + err);
-                    }
+                    qrcode.decode();
                 }
 
                 image.src = e.target.result;
