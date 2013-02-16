@@ -46,8 +46,7 @@
               // check alpha channel value to confirm image is covering edge pixel or not.
               // if alpha value is 0 image is not covering, hence subsampled.
               var res = ctx.getImageData(0, 0, 1, 1).data[3] === 0;
-              canvas.width = canvas.width;
-              canvas.parentNode.removeChild(canvas);
+              canvas = null;
               return res;
             } else {
               return false;
@@ -74,8 +73,7 @@
               }
               py = (ey + sy) >> 1;
             }
-            canvas.width = canvas.width;
-            canvas.parentNode.removeChild(canvas);
+            canvas = null;
             return py / ih;
         }
 
