@@ -159,7 +159,8 @@
                         qrcode.callback = read;
                         qrcode.decode();
                     } catch(err) {
-                        alert(err);
+                        //log detailed error here
+                        alert("QR code not recognized, please make sure QR code is clear and aligned then try again. Details: " + err);
                     }
                 }
 
