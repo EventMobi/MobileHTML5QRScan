@@ -81,7 +81,8 @@
                         qrcode.callback = read;
                         qrcode.decode();
                     } catch(err) {
-                        alert(err);
+                        //log detailed error here
+                        alert("QR code not recognized, please try again. Details: " + err);
                     }
                 }
 
