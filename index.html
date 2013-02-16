@@ -36,7 +36,7 @@
     <script>
 
         function detectSubsampling(img) {
-            var iw = image.naturalWidth, ih = image.naturalHeight;
+            var iw = img.naturalWidth, ih = img.naturalHeight;
             if (iw * ih > 1024 * 1024) { // subsampling may happen over megapixel image
               var canvas = document.createElement('canvas');
               canvas.width = canvas.height = 1;
@@ -98,12 +98,34 @@
                 image.onload = function(e){
                     var canvas = document.getElementById("qr-canvas");
 
+
+
                     var iw = image.naturalWidth, ih = image.naturalHeight;
-                    var width = 800, height = 800;
                     var ctx = canvas.getContext('2d');
                     ctx.save();
-                    // transformCoordinate(canvas, width, height, options.orientation);
-                    var subsampled = detectSubsampling(img);
+                    
+
+                    var MAX_WIDTH = 800;
+                    var MAX_HEIGHT = 800;
+                    var width = image.width;
+                    var height = image.height;
+
+                    if (width > height) {
+                      if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                      }
+                    } else {
+                      if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                      }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(image, 0, 0, width, height);
+                    
+                    var subsampled = detectSubsampling(image);
                     if (subsampled) {
                       iw /= 2;
                       ih /= 2;
@@ -112,7 +134,7 @@
                     var tmpCanvas = document.createElement('canvas');
                     tmpCanvas.width = tmpCanvas.height = d;
                     var tmpCtx = tmpCanvas.getContext('2d');
-                    var vertSquashRatio = detectVerticalSquash(img, iw, ih);
+                    var vertSquashRatio = detectVerticalSquash(image, iw, ih);
                     var sy = 0;
                     while (sy < ih) {
                       var sh = sy + d > ih ? ih - sy : d;
@@ -120,7 +142,7 @@
                       while (sx < iw) {
                         var sw = sx + d > iw ? iw - sx : d;
                         tmpCtx.clearRect(0, 0, d, d);
-                        tmpCtx.drawImage(img, -sx, -sy);
+                        tmpCtx.drawImage(image, -sx, -sy);
                         var dx = Math.floor(sx * width / iw);
                         var dw = Math.ceil(sw * width / iw);
                         var dy = Math.floor(sy * height / ih / vertSquashRatio);
