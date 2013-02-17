@@ -33,18 +33,18 @@ qrcode.successCallback = function(msg){
   	var telPattern = /^tel:/i;
 
 	if(urlPattern.test(msg)) {
-		window.location.replace(msg);
+		window.location.href = msg;
 	} else if (mailtoPattern.test(msg)){
-		window.location.replace(msg.replace(/^mailto:/i,"mailto:"));
+		window.location.href = msg.replace(/^mailto:/i,"mailto:");
 	} else if (telPattern.test(msg)) {
-		window.location.replace(msg.replace(/^tel:/i,"tel:"));
+		window.location.href = msg.replace(/^tel:/i,"tel:");
 	} else if (emailPattern.test(msg)) {
-		window.location.replace("mailto:" + msg);
+		window.location.href = "mailto:" + msg;
 	} else if (matmsgPattern.test(msg)) {
 		var to_recipient = msg.match(/TO:([^;]*);/i)[1];
 		var subject = msg.match(/SUB:([^;]*);/i)[1];
 		var mail_body = msg.match(/BODY:([^;]*);;$/i)[1];
-		window.location.replace("mailto:" + to_recipient + "?subject=" + subject + "&body=" + mail_body);
+		window.location.href = "mailto:" + to_recipient + "?subject=" + subject + "&body=" + mail_body;
 	} else {
 		alert(msg);
 	}
