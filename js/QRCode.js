@@ -32,10 +32,14 @@ qrcode.successCallback = function(msg){
   	var matmsgPattern = /^MATMSG:/i;
   	var telPattern = /^tel:/i;
 
-	if(urlPattern.test(msg) || mailtoPattern.test(msg) || telPattern.test(telPattern)) {
+	if(urlPattern.test(msg)) {
 		window.location.replace(msg);
+	} else if (mailtoPattern.test(msg)){
+		window.location.replace(msg.replace(/^mailto:/i,"mailto:"));
+	} else if (telPattern.test(msg)) {
+		window.location.replace(msg.replace(/^tel:/i,"tel:"));
 	} else if (emailPattern.test(msg)) {
-		window.location.replace('<a href="mailto:' + msg + '" />');
+		window.location.replace("mailto:" + msg);
 	} else if (matmsgPattern.test(msg)) {
 		var to_recipient = msg.match(/TO:([^;]*);/i)[1];
 		var subject = msg.match(/SUB:([^;]*);/i)[1];
