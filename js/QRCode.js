@@ -28,9 +28,9 @@ qrcode.sizeOfDataLengthInfo =  [  [ 10, 9, 8, 8 ],  [ 12, 11, 16, 10 ],  [ 14, 1
 qrcode.successCallback = function(msg){
 	var urlPattern = /(http|ftp|https):\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])?/
 	var emailPattern = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  	var mailtoPattern = /^mailto:/;
-  	var matmsgPattern = /^MATMSG:/;
-  	var telPattern = /^tel:/;
+  	var mailtoPattern = /^mailto:/i;
+  	var matmsgPattern = /^MATMSG:/i;
+  	var telPattern = /^tel:/i;
 
 	if(urlPattern.test(msg) || mailtoPattern.test(msg) || telPattern.test(telPattern)) {
 		window.location.replace(msg);
